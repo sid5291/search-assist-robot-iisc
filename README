@@ -1,0 +1,5 @@
+This is the repository for all software files belonging to the Search and Assist Robot Prototype project conducted under Professor Bharadwaj Amrutur of ECE Department , IISc
+
+./beagleboard-server/ - consists of all the code that is run on the Beagleboard. 
+
+./hostPC-client/ - consists of the code to be run on the hostPC system . 
