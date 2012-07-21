@@ -11,24 +11,24 @@
 #include "tags.c"
 
 
-//GstElement *play;
-GtkWidget *view, *view1;
-int i=0,con_check=0;
-GtkTextBuffer *buffer, *buffer1;
-GtkTextIter iter, iter1;
+
+GtkWidget *view, *view1;                // Declaration of the 2 text views
+int i=0,con_check=0;                    // con_check flag variable to check if connection is established or not
+GtkTextBuffer *buffer, *buffer1;        // global Text Buffers
+GtkTextIter iter, iter1;              
 GtkRcStyle *rc_style;
 GdkColor color;
-GtkWidget *mainwindow, *drawingarea, *vpaned,*start_client ;
+GtkWidget *mainwindow, *vpaned,*start_client ;    // GTKwidgets for the mainwindow and V pane of the two consoles
 GtkWidget *scrolledwindow, *scrolledwindow1;
 int fds[2];
-  int initialize(int argc, char **argv);
-  int execute();
+
+int initialize(int argc, char **argv);
+
+int execute();
 
 
-void input_callback( gpointer          data,
-                    gint              source,
-                    GdkInputCondition condition )
-{
+void input_callback( gpointer data,gint source,GdkInputCondition condition )  // This function reads from the fds pipe opened and displays all the 
+{                                                                             // g_print data in the respective console
    gchar buf[1024];
    gchar go[10];	
    gint chars_read;
@@ -36,11 +36,11 @@ void input_callback( gpointer          data,
    gtk_text_buffer_get_end_iter(buffer, &iter);
    gtk_text_buffer_get_end_iter(buffer1, &iter1);
 	i++;
-   while (chars_read == 1024){
-     chars_read = read(fds[0], buf, 1024);
-     // fprintf(stderr, "%i chars: %s\n", chars_read, buf);
-	//sprintf(go,"key:%c",buf[1]);
-	if (buf[0]=='-')
+   while (chars_read == 1024)
+     {
+        chars_read = read(fds[0], buf, 1024);
+ 	if (buf[0]=='-')                                                      // '-' is used to tag the Data ment for the main console 
+	                                                                      // This is temporary till we use Text boxes for all data seperatelly 
 	       {
                	gtk_text_buffer_insert(buffer1, &iter1,buf,chars_read); 
                 gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW (view1),&iter1, 0.0, FALSE, 0, 0);
@@ -55,8 +55,9 @@ void input_callback( gpointer          data,
 lseek(fds[0],0,SEEK_SET);
 }
 
-static void motorhelp(GtkWidget *widget,gpointer data)
-{
+static void motorhelp(GtkWidget *widget,gpointer data)                       // Function called on clicking motor-help
+{                                                                            // displays an image with the key map and also a line of text with  
+                                                                             // instructions for the user 
   	g_print("-For Wheels i=forward,k=back,j=left,l=right,+=fast,-=slow,0=stop\n");
 	GtkWidget *window;
   	GtkWidget *image;
@@ -70,17 +71,15 @@ static void motorhelp(GtkWidget *widget,gpointer data)
 
   	gtk_container_set_border_width(GTK_CONTAINER(window), 2);
 
-  	image = gtk_image_new_from_file("keyboard.png");
+  	image = gtk_image_new_from_file("keyboard.png");                              // The image displayed must be included in the same folder.
   	gtk_container_add(GTK_CONTAINER(window), image);
 
-
- 	// g_signal_connect_swapped(G_OBJECT(window), "destroy",G_CALLBACK(gtk_main_quit), G_OBJECT(window));
 
   	gtk_widget_show_all(window);
 
 }
 
-static void servohelp(GtkWidget *widget)
+static void servohelp(GtkWidget *widget)                                           //Similar as motor-help but for control of the Camera Mount servos
 {
 
 	g_print("-For Servo a=left, d=right, w=up, s=down, x=off \n");
@@ -102,8 +101,8 @@ static void servohelp(GtkWidget *widget)
 
         gtk_widget_show_all(window);
 }
-static void connect1(GtkWidget *widget)
-{
+static void connect1(GtkWidget *widget)                          // Function called on clicking Connect .. Establishes connection between the client
+{                                                                //                                         and server
 	int a=0;
 	char c;
 	if (con_check == 0)
@@ -125,8 +124,8 @@ static void connect1(GtkWidget *widget)
 		g_print("\nAlready Connected please disconnect before reattempting to connect");
 }
 
-static void init_motor(GtkWidget *widget)
-{
+static void init_motor(GtkWidget *widget)                           //Function invoked on Clicking Initialize sends the tags to server to intialize 
+{                                                                   // all gpios 
    if (con_check == 1)
 	 {
  	         bytes_recieved=recv(sock,recv_data,1024,0);
@@ -172,7 +171,7 @@ static void init_motor(GtkWidget *widget)
 	
 }
 
-static void disconnect1(GtkWidget *widget)
+static void disconnect1(GtkWidget *widget)             // function invoked on clicking Disconnect diconnects the connection between client and server
 {
    if (con_check == 1)
 	 {
@@ -203,20 +202,12 @@ static void disconnect1(GtkWidget *widget)
         g_print("-Already Disconnected\n");
 	
 }
-static void key(GtkWidget *widget,GdkEventKey *kevent, gpointer data)
-{
- 
-	 if(kevent->type == GDK_KEY_PRESS) 
-	{       gtk_button_set_label (GTK_BUTTON (start_client), "Controlling...");
-	 	g_print("\nKeypress:%c", kevent->keyval);	
-	}
-   gtk_button_set_label (GTK_BUTTON (start_client), "Motor Control");
-}
-static void clientserver(GtkWidget *widget,GdkEventKey *kevent, gpointer data)
-{
-	int a=0;
-	char c;
-       if(kevent->type == GDK_KEY_PRESS)  
+
+static void clientserver(GtkWidget *widget,GdkEventKey *kevent, gpointer data)  // This function is invoked when Motor Control is highlited and any  
+{                                                                               // key is pressed. The key press is registered and the depening on
+	int a=0;                                                                // key value a specific command is sent to the server
+	char c;                                                                 // Key presses are only registered when "Motor Control" button is 
+       if(kevent->type == GDK_KEY_PRESS)                                        // highlighted
 	{
 	 gtk_button_set_label (GTK_BUTTON (start_client), "Controlling...");
 	if (con_check == 1)
@@ -225,21 +216,18 @@ static void clientserver(GtkWidget *widget,GdkEventKey *kevent, gpointer data)
           recv_data[bytes_recieved] = '\0';
  
           if (strcmp(recv_data , "ack") != 0)
-          {
-	  // g_print("\n Error Acknowledgment not recieved");
+          {	                                                            // Checking for positive acknowledgement from server
            close(sock);
 	   g_print("-Error:Disconnected\n");
 	   con_check=0;	
 	   return;	
-          // break;
           }
           else
            	g_print("\nAcknowledgement Recieved ");
      
-	    //    g_print("\nKeypress:%c", kevent->keyval);
        
 			c=kevent->keyval;
-			switch(c)
+			switch(c)                                                        // The switch case that maps the specific key to a tag
 			{	case 'w':strcpy(send_data,"sup");chk=1;break;
 				case 's':strcpy(send_data,"sdown");chk=1;break;
 				case 'a':strcpy(send_data,"sleft");chk=1;break;
@@ -262,14 +250,13 @@ static void clientserver(GtkWidget *widget,GdkEventKey *kevent, gpointer data)
 				default :g_print("-Invalid input\n");strcpy(send_data,"error");break;
 			}
 
-        //g_print("\nClient side : %s",send_data);
         send(sock,send_data,strlen(send_data), 0); 
 	}
 	else
                g_print("-Please Connect and try again\n");
        }
 }
-static void camera(GtkWidget *widget)
+static void camera(GtkWidget *widget)                       // invokes the cam.sh script file to display the video feed from the camera
 {
 	
 	char command[20];
@@ -287,10 +274,10 @@ static void camera(GtkWidget *widget)
 
 
 
-int initialize(int argc, char **argv) 
+int initialize(int argc, char **argv)                      // this function initializes the GTK window and the layout
 {
   GtkWidget  *start_camera, *servo_help , *motor_help, *motor_init, *connect, *disconnect;
-  GtkWidget *hbox, *vbox, *vbox1;
+  GtkWidget *hbox, *vbox;
   
   pipe (fds);
    
@@ -298,19 +285,19 @@ int initialize(int argc, char **argv)
 
   gtk_init(&argc, &argv);
  
-  mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);                          // Intializing the Main window
   gtk_window_set_position(GTK_WINDOW(mainwindow), GTK_WIN_POS_CENTER);
-  gtk_window_set_default_size(GTK_WINDOW(mainwindow), 600, 480);
+  gtk_window_set_default_size(GTK_WINDOW(mainwindow), 600, 480);                 // the size 600x480
   gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 0);
   g_signal_connect(G_OBJECT(mainwindow), "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-  start_client = gtk_button_new_with_label("Motor Control");
-  g_signal_connect(start_client,"key_press_event",G_CALLBACK(clientserver),NULL);
+  start_client = gtk_button_new_with_label("Motor Control");                     // intializing the button "Motor Control"
+  g_signal_connect(start_client,"key_press_event",G_CALLBACK(clientserver),NULL); // Connecting key_press_event with the clientserver function
   
-  connect = gtk_button_new_with_label("Connect");
-  g_signal_connect(connect,"clicked",G_CALLBACK(connect1),NULL);
-
-  motor_init = gtk_button_new_with_label("Initialize");
+  connect = gtk_button_new_with_label("Connect");                             // intializing the button "Connect" 
+  g_signal_connect(connect,"clicked",G_CALLBACK(connect1),NULL);              // connecting the clicked signal with connect1 function
+                                                                              // so as to invoke connect1 function on button click   
+  motor_init = gtk_button_new_with_label("Initialize");                       //Similarly done for Initialize, Camera, Disconnect,Motor,Servo-Help
   g_signal_connect(motor_init,"clicked",G_CALLBACK(init_motor),NULL);
 
   start_camera = gtk_button_new_with_label("camera");
@@ -327,76 +314,61 @@ int initialize(int argc, char **argv)
   g_signal_connect(disconnect,"clicked",G_CALLBACK(disconnect1),NULL);
 
 
-  hbox = gtk_hbox_new(FALSE, 0);
-  vbox1 = gtk_vbox_new(TRUE,0);
- /*drawingarea = gtk_drawing_area_new();
-  gtk_widget_set_size_request (drawingarea, 100,200); 
-*/ 
+  hbox = gtk_hbox_new(FALSE, 0);                                    //Establishing the basic boxes that comprimise the layout
+
   vbox = gtk_vbox_new(FALSE, 0);
-  color.red = 0;
-  color.green = 0;
-  color.blue = 0;
-  gdk_color_parse ("black", &color);
+ 
    
-    vpaned = gtk_vpaned_new ();
-   // gtk_container_add (GTK_CONTAINER(window), vpaned);
-   // gtk_paned_set_handle_size (GTK_PANED(vpaned),10);
-    gtk_paned_set_gutter_size (GTK_PANED(vpaned),15);                       
-  //  gtk_widget_show (vpaned);
-   
-    /* Now create the contents of the two halves of the window */
-   
-    //list = create_list ();
-   
-   // gtk_widget_show (list);
-   
-   // text = create_text ();
+  vpaned = gtk_vpaned_new ();                                      // Creating the vertical pane for both consoles 
+
+  gtk_paned_set_gutter_size (GTK_PANED(vpaned),15);                       
   scrolledwindow = gtk_scrolled_window_new(NULL, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
   view = gtk_text_view_new();
+  color.red = 0;
+  color.green = 0;
+  color.blue = 0;
+  gdk_color_parse ("black", &color);                            // establishing the background of the terminal console as black
+    
   gtk_widget_modify_base  (view,GTK_STATE_NORMAL, &color);
   
-  gtk_container_add(GTK_CONTAINER(scrolledwindow), view);
-  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));
+  gtk_container_add(GTK_CONTAINER(scrolledwindow), view);        // Adding the Text View to the scrolled window
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view));        //Intializing the buffer for the Text view
   
-  gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
-  //gtk_text_buffer_create_mark         (buffer,NULL,&iter,FALSE); 
- create_tags(buffer);
+   gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);         // intializing the pointer iter
+ 
+   create_tags(buffer);
    
-  //gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, "Colored Text\n", -1, "white_fg", NULL);
    gtk_paned_add2 (GTK_PANED(vpaned),scrolledwindow);
-  //gtk_text_buffer_insert(buffer, &iter, "Plain text\n", -1);
-  
-  
+
   scrolledwindow1 = gtk_scrolled_window_new(NULL, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC);
   view1 = gtk_text_view_new();
   gtk_container_add(GTK_CONTAINER(scrolledwindow1), view1);
   buffer1 = gtk_text_view_get_buffer(GTK_TEXT_VIEW(view1));
-   create_tags(buffer1);
+  create_tags(buffer1);
   gtk_text_buffer_get_iter_at_offset(buffer1, &iter1, 0);
- // gtk_text_buffer_create_mark         (buffer1,NULL,&iter1,FALSE);
-   gtk_text_buffer_insert_with_tags_by_name(buffer1, &iter1, "Main Console\n",-1, "center","heading", NULL);
+  gtk_text_buffer_insert_with_tags_by_name(buffer1, &iter1, "Main Console\n",-1, "center","heading", NULL);//writing the heading for the main console
    gtk_paned_add1 (GTK_PANED(vpaned), scrolledwindow1);
    gtk_paned_set_position (GTK_PANED(vpaned),240);
-  gtk_box_pack_start(GTK_BOX(vbox), connect, FALSE, FALSE, 2);
+  
+  gtk_box_pack_start(GTK_BOX(vbox), connect, FALSE, FALSE, 2);   //Pack all buttons in to a vertical box
   gtk_box_pack_start(GTK_BOX(vbox), motor_init, FALSE, FALSE, 2);
   gtk_box_pack_start(GTK_BOX(vbox), start_client, FALSE, FALSE, 2);
   gtk_box_pack_start(GTK_BOX(vbox), start_camera, FALSE, FALSE, 2);
   gtk_box_pack_start(GTK_BOX(vbox), servo_help, FALSE, FALSE, 2);
   gtk_box_pack_start(GTK_BOX(vbox), motor_help, FALSE, FALSE, 2);
   gtk_box_pack_start(GTK_BOX(vbox), disconnect, FALSE, FALSE, 2);
-  gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE ,FALSE , 0);
+  gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE ,FALSE , 0);       // pack the vbox and vpaned to the horizontal box
   gtk_box_pack_start(GTK_BOX(hbox), vpaned, TRUE ,TRUE , 0);
   
   
-  gtk_container_add(GTK_CONTAINER(mainwindow), hbox);
+  gtk_container_add(GTK_CONTAINER(mainwindow), hbox);           // add the hbox to the mainwindow
 
   
-  gdk_input_add(fds[0], GDK_INPUT_READ, input_callback, NULL);
+  gdk_input_add(fds[0], GDK_INPUT_READ, input_callback, NULL);  // intialize the fds pipline to read the strings sent to g_print
   
-  gtk_widget_show_all(mainwindow);
-  //gtk_widget_realize(drawingarea);
+  gtk_widget_show_all(mainwindow);                       // draw and display the mainwindow.
 
   return 0;
 }
