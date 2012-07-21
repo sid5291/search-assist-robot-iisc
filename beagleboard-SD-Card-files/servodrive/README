@@ -26,6 +26,8 @@ The default pulse widths are:
      0%    1500 ms
    100%    1900 ms
 
+
+
 In addition the servos may be turned completely off (no pulse).
 
 
@@ -52,6 +54,21 @@ the servo at pin 3 will not move, but if a force pushes the servo
 away from the 100% position, it will not react by moving it back.
 No power is used and there will be no jitter whatsoever.
 
+
+(Edit by Siddhartha Kumar 2012 - sid.kumar.5291@gmail.com)
+--------------------------------------------------------------------------------
+I have modified the code to be able to drive the motor drivers that require a longer
+pulse to invoke this mode all you need to do is write to the /dev/servodrive0
+file for values from 100 to 2500 which will give a pulse time of 12000 + value us
+
+We are using DC geared Motors Given here :
+
+http://www.nex-robotics.com/products/motors-and-accessories/dc-motors/100-rpm-centre-shaft-economy-series-dc-motor.html
+
+with the motor drivers from Sparkfun:
+
+http://www.sparkfun.com/products/9457
+------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------
 
