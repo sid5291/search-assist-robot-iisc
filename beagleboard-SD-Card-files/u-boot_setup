@@ -1,0 +1,52 @@
+Steps for U-boot modification:
+
+First please refer the Beagleboard Refernce Manual page No. 108 for a refernce of all the states that each pin can take.
+
+then type 
+
+MACHINE=beagleboard bitbake -c configure u-boot
+
+Then enter :
+setup-scripts/buid/tmp-*/work/beagleboard/u-boot-*/git/board/ti/beagle/
+
+edit beagle.h :
+To your preference
+
+for example:
+ 
+MUX_VAL(CP(MMC1_DAT7),		(IEN  | PTU | EN  | M0))
+
+the M0 represents the mode that is set at boot - change this to M4 for GPIO or any other depending on your requirement 
+
+Similarly do the same for evm.h in:
+
+setup-scripts/buid/tmp-*/work/beagleboard/u-boot-*/git/board/ti/evm/
+
+after this do:
+
+MACHINE=beagleboard bitbake -c compile u-boot
+
+and enter:
+
+setup-scripts/buid/tmp-*/work/beagleboard/u-boot-*/git/
+
+and copy the 
+
+MLO and u-boot.bin file to the SD card.
+
+Next we need to disable the kernel pin mux configuration:
+
+execute
+
+MACHINE=beagleboard bitbake -c menuconfig virtual/kernel
+
+In the Terminal 
+1. Enter the System Type menu
+2. Then TI OMAP Common Features
+3. Highlight OMAP multiplexing support
+4. and press 'N' 
+
+This will disable the Kernel Multiplexing support and enable the U-boot mux at boot.
+
+Now compile the kernel , bitbake console image and extract the tarball on to the SD card. 
+
