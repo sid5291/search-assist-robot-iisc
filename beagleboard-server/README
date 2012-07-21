@@ -1,0 +1,23 @@
+This is the folder with all the code that runs on the beagle board side.
+
+armserver - is the executable that results from compilation
+
+cam_start - is an executable script file that setsup the camera feed
+
+to compile the program please first install the CodeSorucery-Arm-Compiler 
+
+to compile:
+
+$ arm-none-linux-gnueabi-g++ -o armserver tcpserver.c
+
+
+servo_drive.c - this controls the servo motor 
+
+motor_drive.c - this controls the dc motor driver
+
+init.c - initializes and uninitializes all GPIO pins.
+
+msp_serial,SerialPort.h,SerialPort.cpp - this handles the UART communication with the TIUSB3410 chip via the USB port on the beagleboard. This has not been commented out at the moment but can very easily be incoporated
+
+tcpserver.c - This handles the communication with the client side and interprets the tags sent from the host system via the wireless network, and sends it to the corresponding function.
+

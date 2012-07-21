@@ -1,0 +1,5 @@
+This folder consists of all code that is meant to be run on the host system.
+
+Please use to "base" file in the "GUI/" folder to execute the GUI and run the complete program. 
+
+The "tcpclient.c" program has been incorporated in to the proj1.c file but still exists here as a means for debugging and might be incorporated to make the the program more easier to read later on. 

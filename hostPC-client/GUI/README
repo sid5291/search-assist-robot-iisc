@@ -1,0 +1,11 @@
+This folder has all the code corresponding to the GUI and client interface that runs on the host PC.
+
+for compililng the code pls run ./gtk_compile
+
+proj1.c is the main code that executes and builds the GUI also defines the function for all the buttons and 
+
+base is the compiled output which should be executed by "./base"
+
+cam.sh is a script file which is run in the background to bring up the camera video feed.
+
+tags.c is the file which stores many different font format tags that can be used in the GUI console.
